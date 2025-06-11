@@ -29,7 +29,7 @@
   </div>
 
   <div id="withdraw-section">
-    <input type="number" id="amount" placeholder="Amount to withdraw (KSH)">
+    <input type="number" id="amount" placeholder="Amount to withdraw (≥ 100 KSH)">
     <input type="text" id="mpesa" placeholder="Mpesa number to receive payment">
     <button onclick="submitWithdrawal()">Submit Withdrawal</button>
     <div id="withdraw-msg"></div>
@@ -75,9 +75,18 @@
       const mpesa = document.getElementById('mpesa').value.trim();
       const msgDiv = document.getElementById('withdraw-msg');
       msgDiv.textContent = '';
+      msgDiv.className = '';
 
-      if (!amount || amount < 1 || !mpesa) {
-        msgDiv.textContent = 'Please enter valid amount and Mpesa number.';
+      if (!amount || amount < 100 || !mpesa) {
+        msgDiv.textContent = 'Please enter a valid amount (≥ 100 KSH) and Mpesa number.';
+        msgDiv.className = 'error';
+        return;
+      }
+
+      // Basic Mpesa number validation (Kenya)
+      const mpesaPattern = /^(\+?254|0)?7\d{8}$/;
+      if (!mpesaPattern.test(mpesa)) {
+        msgDiv.textContent = 'Please enter a valid Mpesa number (e.g., 0712345678 or +254712345678).';
         msgDiv.className = 'error';
         return;
       }
@@ -112,3 +121,4 @@
   </script>
 </body>
 </html>
+
