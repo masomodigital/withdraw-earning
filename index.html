@@ -66,7 +66,7 @@
           }
         }).catch(err => {
           document.getElementById('login-error').textContent = 'Server error.';
-          console.error(err);
+          console.error('Login error:', err);
         });
     }
 
@@ -75,6 +75,7 @@
       const mpesa = document.getElementById('mpesa').value.trim();
       const msgDiv = document.getElementById('withdraw-msg');
       msgDiv.textContent = '';
+      msgDiv.className = '';
 
       if (!amount || amount <= 0 || !mpesa || mpesa.length !== 10 || !mpesa.startsWith('0')) {
         msgDiv.textContent = 'Enter a valid amount and 10-digit Mpesa number starting with 0.';
@@ -82,32 +83,40 @@
         return;
       }
 
+      const payload = {
+        nationalId: userNationalId,
+        amount,
+        mpesa,
+        rowIndex: userRowIndex
+      };
+
+      console.log('Sending withdrawal request:', payload);
+
       fetch(scriptURL, {
         method: 'POST',
-        body: JSON.stringify({
-          nationalId: userNationalId,
-          amount,
-          mpesa,
-          rowIndex: userRowIndex
-        }),
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            msgDiv.textContent = 'Your withdrawal request has been received. Wait for approval in 1–2 hours.';
-            msgDiv.className = 'success';
-            document.getElementById('withdraw-section').style.display = 'none';
-          } else {
-            msgDiv.textContent = data.message;
-            msgDiv.className = 'error';
-          }
-        })
-        .catch(err => {
-          msgDiv.textContent = 'Error submitting request.';
+      .then(res => {
+        console.log('HTTP Status:', res.status, res.statusText);
+        return res.json().catch(() => ({ error: 'Invalid JSON response' }));
+      })
+      .then(data => {
+        console.log('Response JSON:', data);
+        if (data.success) {
+          msgDiv.textContent = 'Your withdrawal request has been received. Wait for approval in 1–2 hours.';
+          msgDiv.className = 'success';
+          document.getElementById('withdraw-section').style.display = 'none';
+        } else {
+          msgDiv.textContent = data.message || 'Unknown error.';
           msgDiv.className = 'error';
-          console.error(err);
-        });
+        }
+      })
+      .catch(err => {
+        msgDiv.textContent = 'Error submitting request.';
+        msgDiv.className = 'error';
+        console.error('Withdrawal fetch error:', err);
+      });
     }
   </script>
 </body>
