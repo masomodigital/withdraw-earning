@@ -29,8 +29,8 @@
   </div>
 
   <div id="withdraw-section">
-    <input type="number" id="amount" placeholder="Amount to withdraw (≥ 100 KSH)">
-    <input type="text" id="mpesa" placeholder="Mpesa number to receive payment">
+    <input type="number" id="amount" placeholder="Amount to withdraw (KSH)">
+    <input type="text" id="mpesa" placeholder="Mpesa number (e.g. 0712345678)">
     <button onclick="submitWithdrawal()">Submit Withdrawal</button>
     <div id="withdraw-msg"></div>
   </div>
@@ -75,18 +75,9 @@
       const mpesa = document.getElementById('mpesa').value.trim();
       const msgDiv = document.getElementById('withdraw-msg');
       msgDiv.textContent = '';
-      msgDiv.className = '';
 
-      if (!amount || amount < 100 || !mpesa) {
-        msgDiv.textContent = 'Please enter a valid amount (≥ 100 KSH) and Mpesa number.';
-        msgDiv.className = 'error';
-        return;
-      }
-
-      // Basic Mpesa number validation (Kenya)
-      const mpesaPattern = /^(\+?254|0)?7\d{8}$/;
-      if (!mpesaPattern.test(mpesa)) {
-        msgDiv.textContent = 'Please enter a valid Mpesa number (e.g., 0712345678 or +254712345678).';
+      if (!amount || amount <= 0 || !mpesa || mpesa.length !== 10 || !mpesa.startsWith('0')) {
+        msgDiv.textContent = 'Enter a valid amount and 10-digit Mpesa number starting with 0.';
         msgDiv.className = 'error';
         return;
       }
@@ -104,7 +95,7 @@
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            msgDiv.textContent = 'Your withdrawal request has been received. Wait for approval in 1-2 hours.';
+            msgDiv.textContent = 'Your withdrawal request has been received. Wait for approval in 1–2 hours.';
             msgDiv.className = 'success';
             document.getElementById('withdraw-section').style.display = 'none';
           } else {
