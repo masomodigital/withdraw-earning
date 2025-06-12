@@ -1,41 +1,161 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Withdraw Earnings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial; max-width: 500px; margin: 30px auto; text-align: center; }
-    input, button { width: 100%; padding: 10px; margin: 8px 0; }
-    #user-data, #withdraw-section { display: none; }
-    .error { color: red; }
-    .success { color: green; font-weight: bold; }
-    .processing { color: green; font-weight: bold; }
+    /* Basic reset */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* Form container */
+    #form-container {
+      background-color: #28a745; /* Bootstrap green */
+      padding: 30px 20px 40px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      color: white;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 25px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    input {
+      font-size: 16px;
+      color: #333;
+      border: 1.5px solid #ccc;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus {
+      border-color: #218838;
+      background-color: #e9f5ec;
+    }
+
+    button {
+      background-color: #19692c; /* Darker green */
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #155d25;
+    }
+
+    #user-data, #withdraw-section {
+      background: white;
+      color: #333;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: left;
+      display: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    #withdraw-section input {
+      border: 1.5px solid #ccc;
+      background: white;
+      color: #333;
+    }
+
+    .error {
+      color: #ffdddd;
+      background-color: #c82333;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .success {
+      color: #155724;
+      background-color: #d4edda;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    /* Center text inside user-data */
+    #user-data p {
+      margin: 8px 0;
+      font-weight: 600;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 450px) {
+      #form-container {
+        padding: 20px 15px 30px;
+      }
+
+      input, button {
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+
+      #user-data, #withdraw-section {
+        padding: 15px;
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>Earnings Withdrawal</h2>
+  <div id="form-container">
+    <h2>Earnings Withdrawal</h2>
 
-  <div id="login-section">
-    <input type="text" id="nationalId" placeholder="Enter National ID">
-    <input type="password" id="password" placeholder="Enter Password">
-    <button onclick="login()">Login</button>
-    <div id="login-error" class="error"></div>
-  </div>
-
-  <div id="user-data">
-    <p><strong>Name:</strong> <span id="name"></span></p>
-    <p><strong>Phone:</strong> <span id="phone"></span></p>
-    <p><strong>Promo Code:</strong> <span id="promo"></span></p>
-    <p><strong>Earnings (KSH):</strong> <span id="earnings" style="color:green;"></span></p>
-  </div>
-
-  <div id="withdraw-section">
-    <div id="withdraw-inputs">
-      <input type="number" id="amount" placeholder="Amount to withdraw (KSH)">
-      <input type="text" id="mpesa" placeholder="Mpesa number (e.g. 0712345678)">
-      <button onclick="submitWithdrawal()">Submit Withdrawal</button>
+    <div id="login-section">
+      <input type="text" id="nationalId" placeholder="Enter National ID" autocomplete="off" />
+      <input type="password" id="password" placeholder="Enter Password" autocomplete="off" />
+      <button id="login-btn" onclick="login()">Login</button>
+      <div id="login-error" class="error" style="display:none;"></div>
+      <div id="login-wait" style="color:#d4edda; font-weight:bold; margin-top:10px; display:none;">Please wait...</div>
     </div>
-    <div id="withdraw-msg"></div>
+
+    <div id="user-data">
+      <p><strong>Name:</strong> <span id="name"></span></p>
+      <p><strong>Phone:</strong> <span id="phone"></span></p>
+      <p><strong>Promo Code:</strong> <span id="promo"></span></p>
+      <p><strong>Earnings (KSH):</strong> <span id="earnings" style="color:green;"></span></p>
+    </div>
+
+    <div id="withdraw-section">
+      <input type="number" id="amount" placeholder="Amount to withdraw (KSH)" />
+      <input type="text" id="mpesa" placeholder="Mpesa number (e.g. 0712345678)" />
+      <button onclick="submitWithdrawal()">Submit Withdrawal</button>
+      <div id="withdraw-msg"></div>
+    </div>
   </div>
 
   <script>
@@ -46,11 +166,17 @@
     function login() {
       const id = document.getElementById('nationalId').value.trim();
       const pass = document.getElementById('password').value.trim();
+
+      // Clear previous messages
+      document.getElementById('login-error').style.display = 'none';
       document.getElementById('login-error').textContent = '';
+      document.getElementById('login-wait').style.display = 'block';
 
       fetch(`${scriptURL}?nationalId=${encodeURIComponent(id)}&password=${encodeURIComponent(pass)}`)
         .then(res => res.json())
         .then(data => {
+          document.getElementById('login-wait').style.display = 'none';
+
           if (data.success) {
             document.getElementById('name').textContent = data.name;
             document.getElementById('phone').textContent = data.phone;
@@ -65,10 +191,15 @@
               document.getElementById('withdraw-section').style.display = 'block';
             }
           } else {
-            document.getElementById('login-error').textContent = data.message;
+            const errorDiv = document.getElementById('login-error');
+            errorDiv.textContent = data.message;
+            errorDiv.style.display = 'block';
           }
         }).catch(err => {
-          document.getElementById('login-error').textContent = 'Server error.';
+          document.getElementById('login-wait').style.display = 'none';
+          const errorDiv = document.getElementById('login-error');
+          errorDiv.textContent = 'Server error.';
+          errorDiv.style.display = 'block';
           console.error('Login error:', err);
         });
     }
@@ -86,29 +217,40 @@
         return;
       }
 
-      msgDiv.textContent = 'Wait please...';
-      msgDiv.className = 'processing';
+      const payload = {
+        nationalId: userNationalId,
+        amount,
+        mpesa,
+        rowIndex: userRowIndex
+      };
 
-      const url = `${scriptURL}?action=withdraw&nationalId=${encodeURIComponent(userNationalId)}&amount=${amount}&mpesa=${encodeURIComponent(mpesa)}&rowIndex=${userRowIndex}`;
-      
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            msgDiv.textContent = 'Your withdrawal request has been successfully submitted. Wait for approval within 1–2 hours and your earnings will be sent to the MPESA number which you have given.';
-            msgDiv.className = 'success';
-            // Hide only the inputs, keep message visible
-            document.getElementById('withdraw-inputs').style.display = 'none';
-          } else {
-            msgDiv.textContent = data.message || 'Unknown error.';
-            msgDiv.className = 'error';
-          }
-        })
-        .catch(err => {
-          msgDiv.textContent = 'Error submitting request.';
+      console.log('Sending withdrawal request:', payload);
+
+      fetch(scriptURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => {
+        console.log('HTTP Status:', res.status, res.statusText);
+        return res.json().catch(() => ({ error: 'Invalid JSON response' }));
+      })
+      .then(data => {
+        console.log('Response JSON:', data);
+        if (data.success) {
+          msgDiv.textContent = 'Your withdrawal request has been successfully submitted. Wait for approval within 1-2 hours and your earnings will be sent to the MPESA number which you have given.';
+          msgDiv.className = 'success';
+          document.getElementById('withdraw-section').style.display = 'none';
+        } else {
+          msgDiv.textContent = data.message || 'Unknown error.';
           msgDiv.className = 'error';
-          console.error('Withdrawal fetch error:', err);
-        });
+        }
+      })
+      .catch(err => {
+        msgDiv.textContent = 'Error submitting request.';
+        msgDiv.className = 'error';
+        console.error('Withdrawal fetch error:', err);
+      });
     }
   </script>
 </body>
