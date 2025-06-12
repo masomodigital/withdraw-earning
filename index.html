@@ -30,9 +30,11 @@
   </div>
 
   <div id="withdraw-section">
-    <input type="number" id="amount" placeholder="Amount to withdraw (KSH)">
-    <input type="text" id="mpesa" placeholder="Mpesa number (e.g. 0712345678)">
-    <button onclick="submitWithdrawal()">Submit Withdrawal</button>
+    <div id="withdraw-inputs">
+      <input type="number" id="amount" placeholder="Amount to withdraw (KSH)">
+      <input type="text" id="mpesa" placeholder="Mpesa number (e.g. 0712345678)">
+      <button onclick="submitWithdrawal()">Submit Withdrawal</button>
+    </div>
     <div id="withdraw-msg"></div>
   </div>
 
@@ -84,22 +86,19 @@
         return;
       }
 
-      // Show processing message
       msgDiv.textContent = 'Wait please...';
       msgDiv.className = 'processing';
 
       const url = `${scriptURL}?action=withdraw&nationalId=${encodeURIComponent(userNationalId)}&amount=${amount}&mpesa=${encodeURIComponent(mpesa)}&rowIndex=${userRowIndex}`;
       
-      console.log('Sending withdrawal GET request:', url);
-
       fetch(url)
         .then(res => res.json())
         .then(data => {
-          console.log('Withdrawal response:', data);
           if (data.success) {
             msgDiv.textContent = 'Your withdrawal request has been successfully submitted. Wait for approval within 1–2 hours and your earnings will be sent to the MPESA number which you have given.';
             msgDiv.className = 'success';
-            document.getElementById('withdraw-section').style.display = 'none';
+            // Hide only the inputs, keep message visible
+            document.getElementById('withdraw-inputs').style.display = 'none';
           } else {
             msgDiv.textContent = data.message || 'Unknown error.';
             msgDiv.className = 'error';
