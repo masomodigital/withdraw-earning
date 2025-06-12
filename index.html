@@ -9,6 +9,7 @@
     #user-data, #withdraw-section { display: none; }
     .error { color: red; }
     .success { color: green; font-weight: bold; }
+    .processing { color: green; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -82,6 +83,10 @@
         msgDiv.className = 'error';
         return;
       }
+
+      // Show processing message
+      msgDiv.textContent = 'Wait please...';
+      msgDiv.className = 'processing';
 
       const url = `${scriptURL}?action=withdraw&nationalId=${encodeURIComponent(userNationalId)}&amount=${amount}&mpesa=${encodeURIComponent(mpesa)}&rowIndex=${userRowIndex}`;
       
