@@ -83,36 +83,28 @@
         return;
       }
 
-      const payload = {
-        nationalId: userNationalId,
-        amount,
-        mpesa,
-        rowIndex: userRowIndex
-      };
+      const url = `${scriptURL}?action=withdraw&nationalId=${encodeURIComponent(userNationalId)}&amount=${amount}&mpesa=${encodeURIComponent(mpesa)}&rowIndex=${userRowIndex}`;
+      
+      console.log('Sending withdrawal GET request:', url);
 
-      fetch(scriptURL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      .then(res => {
-        return res.json().catch(() => ({ error: 'Invalid JSON response' }));
-      })
-      .then(data => {
-        if (data.success) {
-          msgDiv.textContent = 'Your withdrawal request has been successfully submitted. Wait for approval within 1–2 hours and your earnings will be sent to the MPESA number which you have given.';
-          msgDiv.className = 'success';
-          document.getElementById('withdraw-section').style.display = 'none';
-        } else {
-          msgDiv.textContent = data.message || 'Unknown error.';
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          console.log('Withdrawal response:', data);
+          if (data.success) {
+            msgDiv.textContent = 'Your withdrawal request has been successfully submitted. Wait for approval within 1–2 hours and your earnings will be sent to the MPESA number which you have given.';
+            msgDiv.className = 'success';
+            document.getElementById('withdraw-section').style.display = 'none';
+          } else {
+            msgDiv.textContent = data.message || 'Unknown error.';
+            msgDiv.className = 'error';
+          }
+        })
+        .catch(err => {
+          msgDiv.textContent = 'Error submitting request.';
           msgDiv.className = 'error';
-        }
-      })
-      .catch(err => {
-        msgDiv.textContent = 'Error submitting request.';
-        msgDiv.className = 'error';
-        console.error('Withdrawal fetch error:', err);
-      });
+          console.error('Withdrawal fetch error:', err);
+        });
     }
   </script>
 </body>
