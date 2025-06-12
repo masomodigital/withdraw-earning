@@ -8,7 +8,7 @@
     input, button { width: 100%; padding: 10px; margin: 8px 0; }
     #user-data, #withdraw-section { display: none; }
     .error { color: red; }
-    .success { color: green; }
+    .success { color: green; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -83,30 +83,37 @@
         return;
       }
 
-      const url = `${scriptURL}?action=withdraw&nationalId=${encodeURIComponent(userNationalId)}&amount=${amount}&mpesa=${encodeURIComponent(mpesa)}&rowIndex=${userRowIndex}`;
-      
-      console.log('Sending withdrawal GET request:', url);
+      const payload = {
+        nationalId: userNationalId,
+        amount,
+        mpesa,
+        rowIndex: userRowIndex
+      };
 
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          console.log('Withdrawal response:', data);
-          if (data.success) {
-            msgDiv.textContent = 'Your withdrawal request has been received. Wait for approval in 1–2 hours.';
-            msgDiv.className = 'success';
-            document.getElementById('withdraw-section').style.display = 'none';
-          } else {
-            msgDiv.textContent = data.message || 'Unknown error.';
-            msgDiv.className = 'error';
-          }
-        })
-        .catch(err => {
-          msgDiv.textContent = 'Error submitting request.';
+      fetch(scriptURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => {
+        return res.json().catch(() => ({ error: 'Invalid JSON response' }));
+      })
+      .then(data => {
+        if (data.success) {
+          msgDiv.textContent = 'Your withdrawal request has been successfully submitted. Wait for approval within 1–2 hours and your earnings will be sent to the MPESA number which you have given.';
+          msgDiv.className = 'success';
+          document.getElementById('withdraw-section').style.display = 'none';
+        } else {
+          msgDiv.textContent = data.message || 'Unknown error.';
           msgDiv.className = 'error';
-          console.error('Withdrawal fetch error:', err);
-        });
+        }
+      })
+      .catch(err => {
+        msgDiv.textContent = 'Error submitting request.';
+        msgDiv.className = 'error';
+        console.error('Withdrawal fetch error:', err);
+      });
     }
   </script>
 </body>
 </html>
-
